@@ -1,6 +1,7 @@
-import React, {useCallback} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   Button,
+  FlatList,
   Image,
   Pressable,
   SafeAreaView,
@@ -10,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 
 import IconBack from '../assets/back.png';
 import IconBlock from '../assets/block.png';
@@ -20,10 +21,18 @@ import IconDownvoteInactive from '../assets/downvote_inactive.png';
 import IconShare from '../assets/share.png';
 import IconUpvoteActive from '../assets/upvote_active.png';
 import IconUpvoteInactive from '../assets/upvote_inactive.png';
+import {useFeedsStore} from '../stores/useFeedsStore';
 
 function PostDetailScreen() {
   const navigation = useNavigation();
   const [showMore, setShowMore] = React.useState(true);
+  const {feeds, upvote, downvote, addComment} = useFeedsStore(state => state);
+
+  const route = useRoute();
+  const id = route?.params.id || 0;
+  const feedDetail = feeds[id];
+
+  const [commentText, setCommentText] = useState('');
 
   const onTextLayout = useCallback(
     e => {
@@ -38,8 +47,8 @@ function PostDetailScreen() {
   );
 
   return (
-    <SafeAreaView>
-      <ScrollView style={{marginBottom: 48}}>
+    <SafeAreaView style={{flex: 1}}>
+      <View style={{marginBottom: 48}}>
         <View>
           <View
             style={{
@@ -57,7 +66,7 @@ function PostDetailScreen() {
             </Pressable>
             <Image
               source={{
-                uri: 'https://picsum.photos/200',
+                uri: feedDetail?.image,
               }}
               width={48}
               height={48}
@@ -66,10 +75,10 @@ function PostDetailScreen() {
             <View style={{marginLeft: 16}}>
               <Text
                 style={{fontWeight: '600', fontSize: 14, lineHeight: 16.94}}>
-                Usup Suparma
+                {feedDetail?.name}
               </Text>
               <Text style={{fontWeight: '400', fontSize: 12, lineHeight: 18}}>
-                Mar 27, 2023
+                {feedDetail?.date}
               </Text>
             </View>
           </View>
@@ -80,14 +89,7 @@ function PostDetailScreen() {
                 style={{}}
                 numberOfLines={showMore ? 3 : 0}
                 onTextLayout={onTextLayout}>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla
-                luctus in ipsum ac dictum. Integer et nunc ut tellus tinci,
-                consectetur adipiscing elit. Nulla luctus in ipsum ac dictum.
-                Integer et nunc ut tellus tinci, consectetur adipiscing elit.
-                Nulla luctus in ipsum ac dictum. Integer et nunc ut tellus tinci
-                Nulla luctus in ipsum ac dictum. Integer et nunc ut tellus
-                tinci, consectetur adipiscing elit. Nulla luctus in ipsum ac
-                dictum.
+                {feedDetail?.post}
               </Text>
               {showMore && (
                 <TouchableOpacity onPress={() => setShowMore(false)}>
@@ -132,7 +134,7 @@ function PostDetailScreen() {
                   marginHorizontal: 4,
                   textAlign: 'center',
                 }}>
-                0
+                {feedDetail?.comments?.length || 0}
               </Text>
             </View>
             <View
@@ -146,7 +148,10 @@ function PostDetailScreen() {
                 width={18}
                 style={{marginLeft: 22}}
               />
-              <Pressable onPress={() => console.log('downvote')}>
+              <Pressable
+                onPress={() => {
+                  downvote(feedDetail?.id);
+                }}>
                 <Image
                   source={IconDownvoteInactive}
                   height={18}
@@ -160,9 +165,12 @@ function PostDetailScreen() {
                   marginHorizontal: 11,
                   textAlign: 'center',
                 }}>
-                0
+                {feedDetail?.vote}
               </Text>
-              <Pressable onPress={() => console.log('upvote')}>
+              <Pressable
+                onPress={() => {
+                  upvote(feedDetail?.id);
+                }}>
                 <Image
                   source={IconUpvoteInactive}
                   height={18}
@@ -174,103 +182,50 @@ function PostDetailScreen() {
           </View>
         </View>
         <View style={{height: 4, backgroundColor: '#C4C4C4'}} />
-        <View
-          style={{
-            flexDirection: 'row',
-            minHeight: 72,
-            paddingVertical: 16,
-            paddingHorizontal: 24,
-          }}>
-          <Image
-            source={{
-              uri: 'https://picsum.photos/200',
-            }}
-            width={36}
-            height={36}
-            style={{borderRadius: 24, marginRight: 16}}
-          />
-          <View style={{width: '90%'}}>
-            <Text
-              style={{
-                fontWeight: '600',
-                fontSize: 12,
-                lineHeight: 14.52,
-                color: '#828282',
-              }}>
-              Usup Suparma
-            </Text>
-            <Text style={{fontWeight: '400', fontSize: 16, lineHeight: 19.36}}>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla
-              luctus in ipsum ac dictum. Integer et nunc ut tellus tinci,
-            </Text>
-          </View>
-        </View>
+        <FlatList
+          data={feedDetail?.comments}
+          renderItem={({item}) => {
+            return (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  minHeight: 72,
+                  paddingVertical: 16,
+                  paddingHorizontal: 24,
+                }}>
+                <Image
+                  source={{
+                    uri: 'https://picsum.photos/200',
+                  }}
+                  width={36}
+                  height={36}
+                  style={{borderRadius: 24, marginRight: 16}}
+                />
+                <View style={{width: '90%'}}>
+                  <Text
+                    style={{
+                      fontWeight: '600',
+                      fontSize: 12,
+                      lineHeight: 14.52,
+                      color: '#828282',
+                    }}>
+                    Usup Suparma
+                  </Text>
+                  <Text
+                    style={{
+                      fontWeight: '400',
+                      fontSize: 16,
+                      lineHeight: 19.36,
+                    }}>
+                    {item}
+                  </Text>
+                </View>
+              </View>
+            );
+          }}
+        />
         <View style={{height: 0.5, backgroundColor: '#C4C4C4'}} />
-        <View
-          style={{
-            flexDirection: 'row',
-            minHeight: 72,
-            paddingVertical: 16,
-            paddingHorizontal: 24,
-          }}>
-          <Image
-            source={{
-              uri: 'https://picsum.photos/200',
-            }}
-            width={36}
-            height={36}
-            style={{borderRadius: 24, marginRight: 16}}
-          />
-          <View style={{width: '90%'}}>
-            <Text
-              style={{
-                fontWeight: '600',
-                fontSize: 12,
-                lineHeight: 14.52,
-                color: '#828282',
-              }}>
-              Usup Suparma
-            </Text>
-            <Text style={{fontWeight: '400', fontSize: 16, lineHeight: 19.36}}>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla
-              luctus in ipsum ac dictum. Integer et nunc ut tellus tinci,
-            </Text>
-          </View>
-        </View>
-        <View style={{height: 0.5, backgroundColor: '#C4C4C4'}} />
-        <View
-          style={{
-            flexDirection: 'row',
-            minHeight: 72,
-            paddingVertical: 16,
-            paddingHorizontal: 24,
-          }}>
-          <Image
-            source={{
-              uri: 'https://picsum.photos/200',
-            }}
-            width={36}
-            height={36}
-            style={{borderRadius: 24, marginRight: 16}}
-          />
-          <View style={{width: '90%'}}>
-            <Text
-              style={{
-                fontWeight: '600',
-                fontSize: 12,
-                lineHeight: 14.52,
-                color: '#828282',
-              }}>
-              Usup Suparma
-            </Text>
-            <Text style={{fontWeight: '400', fontSize: 16, lineHeight: 19.36}}>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla
-              luctus in ipsum ac dictum. Integer et nunc ut tellus tinci,
-            </Text>
-          </View>
-        </View>
-        <View style={{height: 0.5, backgroundColor: '#C4C4C4'}} />
-      </ScrollView>
+      </View>
       <View
         style={{
           position: 'absolute',
@@ -283,8 +238,20 @@ function PostDetailScreen() {
           zIndex: 10,
         }}>
         <View style={{height: 0.5, backgroundColor: '#C4C4C4'}} />
-        <TextInput placeholder="Enter Comment" style={{flex: 1}} />
-        <Button title="Comment" onPress={() => console.log('comment')} />
+        <TextInput
+          placeholder="Enter Comment"
+          value={commentText}
+          style={{flex: 1}}
+          onChangeText={text => setCommentText(text)}
+        />
+        <Button
+          title="Comment"
+          onPress={() => {
+            addComment(feedDetail?.id, commentText);
+            setCommentText('');
+          }}
+          disabled={commentText.length <= 0}
+        />
       </View>
     </SafeAreaView>
   );
