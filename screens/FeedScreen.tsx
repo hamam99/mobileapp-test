@@ -118,10 +118,15 @@ function FeedScreen() {
               <Pressable
                 onPress={() => {
                   console.log('downVote');
+                  if (item?.vote <= 0) {
+                    return;
+                  }
                   downvote(item?.id);
                 }}>
                 <Image
-                  source={IconDownvoteInactive}
+                  source={
+                    item?.vote <= 0 ? IconDownvoteInactive : IconDownvoteActive
+                  }
                   height={18}
                   width={18}
                   style={{marginLeft: 24}}
@@ -141,7 +146,7 @@ function FeedScreen() {
                   console.log('upvote');
                 }}>
                 <Image
-                  source={IconUpvoteInactive}
+                  source={IconUpvoteActive}
                   height={18}
                   width={18}
                   style={{marginRight: 22}}

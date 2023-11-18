@@ -153,7 +153,11 @@ function PostDetailScreen() {
                   downvote(feedDetail?.id);
                 }}>
                 <Image
-                  source={IconDownvoteInactive}
+                  source={
+                    feedDetail?.vote <= 0
+                      ? IconDownvoteInactive
+                      : IconDownvoteActive
+                  }
                   height={18}
                   width={18}
                   style={{marginLeft: 24}}
@@ -172,7 +176,7 @@ function PostDetailScreen() {
                   upvote(feedDetail?.id);
                 }}>
                 <Image
-                  source={IconUpvoteInactive}
+                  source={IconUpvoteActive}
                   height={18}
                   width={18}
                   style={{marginRight: 22}}
