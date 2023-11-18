@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback} from 'react';
 import {
   Button,
   Image,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
@@ -22,6 +23,20 @@ import IconUpvoteInactive from '../assets/upvote_inactive.png';
 
 function PostDetailScreen() {
   const navigation = useNavigation();
+  const [showMore, setShowMore] = React.useState(true);
+
+  const onTextLayout = useCallback(
+    e => {
+      if (showMore === false) {
+        return;
+      }
+      const numberOfLine = e.nativeEvent.lines.length;
+      const isNeedShowMore = numberOfLine >= 3;
+      setShowMore(isNeedShowMore);
+    },
+    [showMore],
+  );
+
   return (
     <SafeAreaView>
       <ScrollView style={{marginBottom: 48}}>
@@ -60,15 +75,26 @@ function PostDetailScreen() {
           </View>
           <View style={{height: 0.5, backgroundColor: '#C4C4C4'}} />
           <View>
-            <Text style={{margin: 24}}>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla
-              luctus in ipsum ac dictum. Integer et nunc ut tellus tinci,
-              consectetur adipiscing elit. Nulla luctus in ipsum ac dictum.
-              Integer et nunc ut tellus tinci, consectetur adipiscing elit.
-              Nulla luctus in ipsum ac dictum. Integer et nunc ut tellus tinci
-              Nulla luctus in ipsum ac dictum. Integer et nunc ut tellus tinci,
-              consectetur adipiscing elit. Nulla luctus in ipsum ac dictum.
-            </Text>
+            <View style={{margin: 24}}>
+              <Text
+                style={{}}
+                numberOfLines={showMore ? 3 : 0}
+                onTextLayout={onTextLayout}>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla
+                luctus in ipsum ac dictum. Integer et nunc ut tellus tinci,
+                consectetur adipiscing elit. Nulla luctus in ipsum ac dictum.
+                Integer et nunc ut tellus tinci, consectetur adipiscing elit.
+                Nulla luctus in ipsum ac dictum. Integer et nunc ut tellus tinci
+                Nulla luctus in ipsum ac dictum. Integer et nunc ut tellus
+                tinci, consectetur adipiscing elit. Nulla luctus in ipsum ac
+                dictum.
+              </Text>
+              {showMore && (
+                <TouchableOpacity onPress={() => setShowMore(false)}>
+                  <Text style={{color: 'blue'}}>More</Text>
+                </TouchableOpacity>
+              )}
+            </View>
             <Image
               source={{
                 uri: 'https://picsum.photos/200',
